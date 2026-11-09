@@ -1,0 +1,88 @@
+
+import cv2
+
+def main():
+    # Load the pre-trained face detection model
+    cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+    face_cascade = cv2.CascadeClassifier(cascade_path)
+
+    if face_cascade.empty():
+        print("Error: Could not load the face detection model.")
+        return
+
+    # Open the webcam
+    camera = cv2.VideoCapture(0)
+
+    if not camera.isOpened():
+        print("Error: Could not access the webcam.")
+        return
+
+    print("Face Detection Started!")
+    print("Press Q to exit.")
+
+    try:
+        while True:
+            # Capture a frame
+            success, frame = camera.read()
+
+            if not success:
+                print("Error: Could not read from webcam.")
+                break
+
+            # Convert the frame to grayscale
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+            # Detect faces
+            faces = face_cascade.detectMultiScale(
+                gray,
+                scaleFactor=1.1,
+                minNeighbors=5,
+                minSize=(30, 30)
+            )
+
+            # Draw rectangles around detected faces
+            for (x, y, w, h) in faces:
+                cv2.rectangle(
+                    frame,
+                    (x, y),
+                    (x + w, y + h),
+                    (0, 255, 0),
+                    2
+                )
+
+                cv2.putText(
+                    frame,
+                    "Face Detected",
+                    (x, y - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.7,
+                    (0, 255, 0),
+                    2
+                )
+
+            # Display the number of detected faces
+            cv2.putText(
+                frame,
+                f"Faces: {len(faces)}",
+                (10, 30),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.8,
+                (0, 255, 255),
+                2
+            )
+
+            # Display the video
+            cv2.imshow("Face Detection System", frame)
+
+            # Press Q to exit
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
+
+    finally:
+        camera.release()
+        cv2.destroyAllWindows()
+        print("Face Detection Stopped.")
+
+
+if __name__ == "__main__":
+    main()
